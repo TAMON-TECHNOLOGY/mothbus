@@ -1,4 +1,4 @@
-# mothbus, a c++11 library for the modbus protocol
+# mothbus, a c++17 library for the modbus protocol
 
 [![Build Status](https://travis-ci.org/ChrisBFX/mothbus.svg?branch=master)](https://travis-ci.org/ChrisBFX/mothbus)
 
@@ -26,8 +26,7 @@ unaddressed issues and internal inconsistencies.
 
 ## Requirements
 
-* C++11, propably some C++14 features required
-* gsl (tested with https://github.com/viboes/GSL)
+* C++17
 * boost (asio, system (program_options for examples))
 * google-test for unit tests
 
@@ -61,7 +60,7 @@ int main(int argc, char** argv)
 	client.read_registers(slave, register_address, singleRegister);
 	
 	// output value
-	uint16_t value = (gsl::to_integer<uin16_t>(singleRegister[0]) << 8) + gsl::to_integer<uin16_t>(singleRegister[0]);
+	uint16_t value = (std::to_integer<uin16_t>(singleRegister[0]) << 8) + std::to_integer<uin16_t>(singleRegister[0]);
 	std::cout << value;	
 	return 0;
 }
