@@ -1,6 +1,6 @@
 /*!
- * \file		resp_reading_register.h
- * \brief		The Implementation of responese of reading_register(0x03).
+ * \file		resp_reading_input_register.h
+ * \brief		The Implementation of responese of read_input_registers(0x04).
  */
 #pragma once
 #include "../pdu.h"
@@ -9,10 +9,10 @@ namespace mothbus
 {
 	namespace pdu
 	{
-		class read_holding_pdu_resp : public pdu_base<function_code::read_holding_registers>
+		class read_input_pdu_resp : public pdu_base<function_code::read_input_registers>
 		{
 		public:
-			read_holding_pdu_resp(span<byte> v)
+			read_input_pdu_resp(span<byte> v)
 				: values(v),
 				  byte_count(static_cast<uint8_t>(v.size()))
 			{
@@ -23,8 +23,8 @@ namespace mothbus
 		};
 
 
-		template <class Reader>//, std::ptrdiff_t Extent>
-		error_code read(Reader& reader, read_holding_pdu_resp& resp)
+		template <class Reader>
+		error_code read(Reader& reader, read_input_pdu_resp& resp)
 		{
 			MOTH_CHECKED_RETURN(read(reader, resp.byte_count));
 			if (resp.byte_count > resp.values.size()) {
@@ -37,10 +37,10 @@ namespace mothbus
 			return{};
 		}
 
-		template <class Writer>//, std::ptrdiff_t Extent>
-		void write(Writer& writer, const read_holding_pdu_resp& v)
+		template <class Writer>
+		void write(Writer& writer, const read_input_pdu_resp& v)
 		{
-			write(writer, read_holding_pdu_resp::fc);
+			write(writer, read_input_pdu_resp::fc);
 			write(writer, v.byte_count);
 			write(writer, v.values);
 		}

@@ -74,5 +74,5 @@ unsigned short CRC16(span<uint8_t> msg)
 }
 
 
-}
-}
+} // namespace rtu
+} // namespace mothbus

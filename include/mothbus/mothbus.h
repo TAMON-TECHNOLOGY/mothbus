@@ -1,8 +1,8 @@
 #pragma once
 
-#include <boost/variant.hpp>
-//#include <gsl/span>
-#include <gsl/gsl>
+#include <cstddef> // for std::byte
+#include <span>
+#include <variant>
 #include <boost/system/system_error.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
@@ -10,13 +10,13 @@
 namespace mothbus
 {
 	template<class ...T>
-	using variant = boost::variant<T...>;
+	using variant = std::variant<T...>;
 
 
-	template<class T>//, std::ptrdiff_t Extent=gsl::dynamic_extent>
-	using span = gsl::span<T>;//, Extent>;
+	template<class T>
+	using span = std::span<T>;
 
-	using byte = gsl::byte;
+	using byte = std::byte;
 
 
 	template <typename SyncWriteStream, typename ConstBufferSequence>
@@ -58,4 +58,4 @@ namespace mothbus
 
 		int error_code;
 	};
-}
+} // namespace mothbus

@@ -9,12 +9,17 @@ namespace mothbus
 		class buffer
 		{
 		public:
-			buffer(std::array<uint8_t, 255>& b)
+			buffer(std::span<uint8_t> b)
 				: message_buffer(b)
 			{
 			}
+			template<std::size_t N>
+			buffer(std::array<uint8_t, N>& b)
+				: message_buffer(std::span<uint8_t>{ b.begin(), b.size() })
+			{
+			}
 
-			std::array<uint8_t, 255>& message_buffer;
+			std::span<uint8_t> message_buffer;
 
 			void put(uint8_t v)
 			{
@@ -23,8 +28,10 @@ namespace mothbus
 
 			error_code get(uint8_t& out)
 			{
-				if (input_start >= input_end)
-					return make_error_code(modbus_exception_code::to_many_bytes_received);
+				if (input_start >= input_end) {
+					return make_error_code(modbus_exception_code::too_many_bytes_received);
+				}
+
 				out = message_buffer[input_start];
 				input_start++;
 				return{};
@@ -60,5 +67,5 @@ namespace mothbus
 		{
 			return in.get(out);
 		}
-	}
-}
+	} // namespace adu
+} // namespace mothbus

@@ -1,7 +1,8 @@
 #pragma once
-#include <mothbus/mothbus.h>
-#include <cstdint>
-#include <mothbus/error.h>
+#include "mothbus.h"
+#include "../error.h"
+#include "pdu/reader.h"
+#include "pdu/writer.h"
 
 namespace mothbus
 {
@@ -9,98 +10,10 @@ namespace mothbus
 	{
 #define MOTH_CHECKED_RETURN(expr) { auto ec = expr; if (!!ec) return ec; }
 
-		template <class Reader, class C>
-		error_code read(Reader& reader, C& v);
-
-		template <class Writer, class C>
-		void write(Writer& writer, const C& v);
-
-		template <class Sink>
-		class writer
-		{
-		public:
-			writer(Sink& sink)
-				: _sink(sink)
-			{
-			};
-
-			inline void write(uint16_t v)
-			{
-				_sink.put((v >> 8) & 0xff);
-				_sink.put(v & 0xff);
-			}
-
-			inline void write(uint8_t v)
-			{
-				_sink.put(v);
-			}
-
-
-		private:
-			Sink& _sink;
-		};
-
-		template <class Reader>
-		error_code read(Reader& reader, uint8_t& v)
-		{
-			reader.get(v);
-			return{};
-		}
-
-		template <class Reader>
-		error_code read(Reader& reader, uint16_t& v)
-		{
-			uint8_t b = 0;
-			MOTH_CHECKED_RETURN(read(reader, b));
-			v = b << 8;
-			MOTH_CHECKED_RETURN(read(reader, b));
-			v |= b;
-			return{};
-		}
-
-
-		template <class Reader>
-		error_code read(Reader& reader, span<byte>& v)
-		{
-			for (auto& byte : v)
-			{
-				uint8_t temp = 0;
-				MOTH_CHECKED_RETURN(read(reader, temp));
-				byte = gsl::to_byte(temp);
-			}
-			return{};
-		}
-
-		template <class Writer>
-		void write(Writer& writer, uint8_t v)
-		{
-			writer.write(v);
-		}
-
-		template <class Writer>
-		void write(Writer& writer, uint16_t v)
-		{
-			writer.write(v);
-		}
-
-		template <class Writer>//, std::ptrdiff_t Extent>
-		inline void write(Writer& writer, const span<byte>& v)
-		{
-			for (auto& byte : v)
-			{
-				writer.write(gsl::to_integer<uint8_t>(byte));
-			}
-		}
-
-		class address
-		{
-		public:
-			uint16_t value;
-		};
-
 		enum class function_code : uint8_t
 		{
-			read_holding_registers = 0x03
+			read_holding_registers = 0x03,
+			read_input_registers = 0x04
 		};
 
 		template <class Reader>
@@ -113,8 +26,9 @@ namespace mothbus
 		}
 
 		class read_holding_pdu_req;
-		//template<std::ptrdiff_t Extent=gsl::dynamic_extent>
 		class read_holding_pdu_resp;
+		class read_input_pdu_req;
+		class read_input_pdu_resp;
 
 		class not_implemented
 		{
@@ -129,17 +43,17 @@ namespace mothbus
 			constexpr static function_code fc = FunctionCode;
 		};
 
-		template<function_code FunctionCode>
-		constexpr function_code pdu_base<FunctionCode>::fc;
+		// template<function_code FunctionCode>
+		// constexpr function_code pdu_base<FunctionCode>::fc;
 
-		using pdu_req = variant<read_holding_pdu_req, not_implemented>;
+		using pdu_req = variant<read_holding_pdu_req, read_input_pdu_req, not_implemented>;
 
 
 		namespace detail
 		{
 			template <class Head, class ...Tail, class Reader>
 			typename std::enable_if<std::is_same<Head, not_implemented>::value, error_code>::type
-				read_pdu_variant(Reader& reader, pdu_req& resp, function_code functionCode)
+				read_pdu_variant(Reader& reader, pdu_req& resp, [[maybe_unused]] function_code functionCode)
 			{
 				resp = not_implemented{};
 				return make_error_code(modbus_exception_code::illegal_function);
@@ -164,8 +78,16 @@ namespace mothbus
 			{
 				return read_pdu_variant<t...>(reader, resp, functionCode);
 			}
-		}
+		} // namespace detail
 
+		/*!
+		 * \brief			read function code from reader.
+		 * \param[in, out]	reader	reader.
+		 * \param[out]		req		set value according to read function code.
+		 *
+		 * if there is no define type or set variant correspoinding to read function code,
+		 * set req to \a not_implemented .
+		 */
 		template <class Reader>
 		error_code read(Reader& reader, pdu_req& req)
 		{
@@ -180,22 +102,6 @@ namespace mothbus
 			writer.write(static_cast<uint8_t>(functionCode));
 		}
 
-
-
-		template <class Reader>
-		error_code read(Reader& reader, modbus_exception_code& v)
-		{
-			uint8_t h;
-			MOTH_CHECKED_RETURN(read(reader, h));
-			v = static_cast<modbus_exception_code>(h);
-			return{};
-		}
-
-		template <class Writer>
-		void write(Writer& writer, const modbus_exception_code& v)
-		{
-			write(writer, static_cast<uint8_t>(v));
-		}
 
 		class pdu_exception_resp
 		{
@@ -213,7 +119,6 @@ namespace mothbus
 			write(writer, v.exceptionCode);
 		}
 
-		//using pdu_resp = variant<pdu_exception_resp, read_holding_pdu_resp, not_implemented>;
 
 		template <class Resp>
 		class pdu_resp
@@ -228,20 +133,23 @@ namespace mothbus
 			uint8_t fC;
 			MOTH_CHECKED_RETURN(read(reader, fC));
 			// 0x80 marks an modbus exception
-			if (fC & 0x80)
-			{
+			if (fC & 0x80) {
 				pdu_exception_resp exc;
 				exc.fc = static_cast<function_code>(fC & 0x7f);
 				MOTH_CHECKED_RETURN(read(reader, exc.exceptionCode));
 				return make_error_code(exc.exceptionCode);
 			}
-			function_code function_code_value = static_cast<function_code>(fC);
-			if (function_code_value != Response::fc)
+
+			const function_code function_code_value = static_cast<function_code>(fC);
+			if (function_code_value != Response::fc) {
 				return make_error_code(modbus_exception_code::invalid_response);
-			return read(reader, resp.resp);
+			}
+			return read(reader, resp.resp); // call read function in pdu/resp_*.h
 		}
-	}
-}
+	} // namespace pdu
+} // namespace mothbus
 
 #include "pdu/req_reading_register.h"
 #include "pdu/resp_reading_register.h"
+#include "pdu/req_reading_input_register.h"
+#include "pdu/resp_reading_input_register.h"
