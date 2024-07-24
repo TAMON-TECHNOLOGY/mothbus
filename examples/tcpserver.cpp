@@ -5,7 +5,7 @@
 using boost::asio::ip::tcp;
 
 template <class Stream>
-struct req_handler : boost::static_visitor<void>
+struct req_handler
 {
 	mothbus::tcp::stream<Stream>& stream;
 	uint16_t transactionId;
@@ -38,7 +38,7 @@ struct req_handler : boost::static_visitor<void>
 		}
 		if (req.starting_address == 100)
 		{
-			std::vector<mothbus::byte> regs(req.quantity_of_registers * 2, gsl::to_byte<0>());
+			std::vector<mothbus::byte> regs(req.quantity_of_registers * 2, moethbus::byte(0));
 			mothbus::pdu::read_holding_pdu_resp resp(regs);
 			stream.write_response(transactionId, slave, resp);
 			return;
@@ -74,7 +74,7 @@ struct connection : public std::enable_shared_from_this<connection>
 	void handle(uint16_t transactionId, uint8_t slave)
 	{
 		req_handler<tcp::socket> handler{ mothbus_stream, transactionId, slave };
-		boost::apply_visitor(handler, req);
+		std::visit(handler, req);
 		async_read();
 	}
 

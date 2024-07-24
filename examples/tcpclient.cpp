@@ -6,10 +6,10 @@
 
 namespace po = boost::program_options;
 
-std::ostream& operator<<(std::ostream& os, const gsl::span<gsl::byte>& bytes) 
+std::ostream& operator<<(std::ostream& os, const std::span<std::byte>& bytes) 
 {
 	for (auto byte : bytes)
-		os << std::hex << std::setw(2) << std::setfill('0') << gsl::to_integer<int>(byte);
+		os << std::hex << std::setw(2) << std::setfill('0') << std::to_integer<int>(byte);
 	return os;
 }
 
