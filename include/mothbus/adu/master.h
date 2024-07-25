@@ -60,6 +60,26 @@ namespace mothbus
 				}
 				return{};
 			}
+			/*!
+			 * \brief			write single coil function. (0x05)
+			 * \param			slave		slave(or unit id)
+			 * \param			address		write (pdu) address. 0x0000 to 0xFFFF.
+			 * \param			value		write value
+			 */
+			error_code write_single_coil(uint8_t slave, uint16_t address, bool value)
+			{
+				pdu::write_single_coil_pdu_req req;
+				req.address = address;
+				req.value = value ? 0xFF00 : 0x0000; 
+				const auto transaction_id = m_stream.write_request(slave, req);
+
+				pdu::write_single_coil_pdu_resp resp;
+				auto ec = m_stream.read_response(transaction_id, slave, resp);
+				if (!!ec) {
+					return ec;
+				}
+				return{};
+			}
 
 			/*!
 			 * \brief			read discrete inputs function. (0x02)
