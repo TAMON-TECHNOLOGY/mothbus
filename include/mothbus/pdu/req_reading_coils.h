@@ -2,7 +2,7 @@
  * \file		req_reading_coils.h
  * \brief		The Implementation of request of read_coils(0x01).
  *
- * Copyright (c) shousen. Released under the MIT license. Date: 2024-07-24
+ * Copyright (c) shousen. Released under the MIT license.
  */
 #pragma once
 #include "../pdu.h"
