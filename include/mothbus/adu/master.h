@@ -31,6 +31,36 @@ namespace mothbus
 
 			// TODO: is need span<byte> out interface?
 
+			/*!
+			 * \brief			read coils function. (0x01)
+			 * \param			slave		slave(or unit id)
+			 * \param			address		start (pdu) address. 0x0000 to 0xFFFF.
+			 * \param			quantity	quantity of coils. 1 to 2000.
+			 * \param[out]		out			coil status. (quantity - 1) / 8 + 1 <= out.size().
+			 *
+			 * The LSB of the first data byte contains the output addressed in the query.
+			 */
+			error_code read_coils(uint8_t slave, uint16_t address, uint16_t quantity, span<byte> out)
+			{
+				assert(1 <= quantity && quantity <= 2000);
+				assert((quantity - 1) / 8 + 1 <= out.size());
+
+				pdu::read_coils_pdu_req req;
+				req.starting_address = address;
+				req.quantity_of_coils = quantity; 
+				const auto transaction_id = m_stream.write_request(slave, req);
+
+				pdu::read_coils_pdu_resp resp;
+				auto ec = m_stream.read_response(transaction_id, slave, resp);
+				if (!!ec) {
+					return ec;
+				}
+				if (resp.byte_count != out.size()) {
+					return make_error_code(modbus_exception_code::invalid_response);
+				}
+				return{};
+			}
+
 			// 0x03
 			error_code read_registers(uint8_t slave, uint16_t address, span<byte> out)
 			{

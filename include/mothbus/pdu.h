@@ -12,6 +12,7 @@ namespace mothbus
 
 		enum class function_code : uint8_t
 		{
+			read_coils = 0x01,
 			read_holding_registers = 0x03,
 			read_input_registers = 0x04
 		};
@@ -25,6 +26,8 @@ namespace mothbus
 			return{};
 		}
 
+		class read_coils_pdu_req;
+		class read_coils_pdu_resp;
 		class read_holding_pdu_req;
 		class read_holding_pdu_resp;
 		class read_input_pdu_req;
@@ -149,6 +152,8 @@ namespace mothbus
 	} // namespace pdu
 } // namespace mothbus
 
+#include "pdu/req_reading_coils.h"
+#include "pdu/resp_reading_coils.h"
 #include "pdu/req_reading_register.h"
 #include "pdu/resp_reading_register.h"
 #include "pdu/req_reading_input_register.h"
