@@ -53,6 +53,6 @@ TEST(tcp, testStream)
 	mothbus::tcp_master<Sync_Stream> client(stream);
 	std::array<mothbus::byte, 2> singleRegister;
 	client.read_registers(255, 1, singleRegister);
-	ASSERT_EQ(0x02, gsl::to_integer<int>(singleRegister[0]));
-	ASSERT_EQ(0x2B, gsl::to_integer<int>(singleRegister[1]));
+	ASSERT_EQ(0x02, std::to_integer<int>(singleRegister[0]));
+	ASSERT_EQ(0x2B, std::to_integer<int>(singleRegister[1]));
 }

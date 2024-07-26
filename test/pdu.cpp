@@ -73,12 +73,12 @@ TEST(pdu_resp, canReadHoldingRegister)
 	pdu::pdu_resp<pdu::read_holding_pdu_resp> combinedResponse{resp};
 	pdu::read(in, combinedResponse);
 	ASSERT_EQ(6, resp.byte_count);
-	ASSERT_EQ(0x02, gsl::to_integer<int>(resp.values[0]));
-	ASSERT_EQ(0x2B, gsl::to_integer<int>(resp.values[1]));
-	ASSERT_EQ(0x00, gsl::to_integer<int>(resp.values[2]));
-	ASSERT_EQ(0x00, gsl::to_integer<int>(resp.values[3]));
-	ASSERT_EQ(0x00, gsl::to_integer<int>(resp.values[4]));
-	ASSERT_EQ(0x04, gsl::to_integer<int>(resp.values[5]));
+	ASSERT_EQ(0x02, std::to_integer<int>(resp.values[0]));
+	ASSERT_EQ(0x2B, std::to_integer<int>(resp.values[1]));
+	ASSERT_EQ(0x00, std::to_integer<int>(resp.values[2]));
+	ASSERT_EQ(0x00, std::to_integer<int>(resp.values[3]));
+	ASSERT_EQ(0x00, std::to_integer<int>(resp.values[4]));
+	ASSERT_EQ(0x04, std::to_integer<int>(resp.values[5]));
 }
 
 TEST(pdu_resp, canWriteHoldingRegister)
@@ -87,12 +87,12 @@ TEST(pdu_resp, canWriteHoldingRegister)
 	vector_sink out;
 	pdu::writer<vector_sink> writer(out);
 	std::array<byte, 6> buffer;
-	buffer[0] = gsl::to_byte<0x02>();
-	buffer[1] = gsl::to_byte<0x2B>();
-	buffer[2] = gsl::to_byte<0x00>();
-	buffer[3] = gsl::to_byte<0x00>();
-	buffer[4] = gsl::to_byte<0x00>();
-	buffer[5] = gsl::to_byte<0x04>();
+	buffer[0] = std::to_byte<0x02>();
+	buffer[1] = std::to_byte<0x2B>();
+	buffer[2] = std::to_byte<0x00>();
+	buffer[3] = std::to_byte<0x00>();
+	buffer[4] = std::to_byte<0x00>();
+	buffer[5] = std::to_byte<0x04>();
 	pdu::read_holding_pdu_resp resp(buffer);
 	pdu::write(writer, resp);
 	ASSERT_EQ(expected, out.values);
