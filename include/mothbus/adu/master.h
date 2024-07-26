@@ -141,6 +141,26 @@ namespace mothbus
 				}
 				return ec;
 			}
+			/*!
+			 * \brief			write single register function. (0x06)
+			 * \param			slave		slave(or unit id)
+			 * \param			address		write (pdu) address. 0x0000 to 0xFFFF.
+			 * \param			value		write value
+			 */
+			error_code write_single_register(uint8_t slave, uint16_t address, uint16_t value)
+			{
+				pdu::write_single_register_pdu_req req;
+				req.address = address;
+				req.value = value;
+				const auto transaction_id = m_stream.write_request(slave, req);
+
+				pdu::write_single_register_pdu_resp resp;
+				auto ec = m_stream.read_response(transaction_id, slave, resp);
+				if (!!ec) {
+					return ec;
+				}
+				return{};
+			}
 
 			// 0x04
 			error_code read_input_registers(uint8_t slave, uint16_t address, span<byte> out)
