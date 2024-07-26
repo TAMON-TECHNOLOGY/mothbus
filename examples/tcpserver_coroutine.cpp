@@ -65,7 +65,7 @@ namespace {
 	{
 		mothbus::tcp::stream<tcp::socket> mothbus_stream{ socket };
 
-		std::array<std::uint8_t, 320> message_buffer;
+		std::vector<std::uint8_t> message_buffer(320);
 		mothbus::adu::buffer source(message_buffer);
 
 		mothbus::pdu::pdu_req request;

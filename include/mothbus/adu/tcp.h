@@ -130,7 +130,7 @@ namespace mothbus
 			template <class Callback>
 			struct request_read_op
 			{
-				request_read_op(NextLayer& next_layer, std::array<uint8_t, 320>& buffer, pdu::pdu_req& request, Callback&& callback) :
+				request_read_op(NextLayer& next_layer, std::span<uint8_t> buffer, pdu::pdu_req& request, Callback&& callback) :
 					next_layer(next_layer),
 					source(buffer),
 					request(request),
