@@ -64,13 +64,13 @@ namespace {
 	boost::asio::awaitable<void> handle_message(tcp::socket socket)
 	{
 		mothbus::tcp::stream<tcp::socket> mothbus_stream{ socket };
-
 		std::vector<std::uint8_t> message_buffer(320);
-		mothbus::adu::buffer source(message_buffer);
 
-		mothbus::pdu::pdu_req request;
 		for (;;)
 		{
+			mothbus::adu::buffer source(message_buffer);
+			mothbus::pdu::pdu_req request;
+
 			// parse header
 			std::size_t read_size = co_await boost::asio::async_read(socket, source.prepare(7), boost::asio::use_awaitable);
 			const auto [transactionId, protocol, messageLength, unit_id] = mothbus::tcp::parse_header(source, read_size);
