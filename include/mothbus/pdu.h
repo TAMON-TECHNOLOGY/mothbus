@@ -10,6 +10,9 @@ namespace mothbus
 	{
 #define MOTH_CHECKED_RETURN(expr) { auto ec = expr; if (!!ec) return ec; }
 
+		/*!
+		 * \brief			function code
+		 */
 		enum class function_code : uint8_t
 		{
 			read_coils = 0x01,
@@ -56,10 +59,16 @@ namespace mothbus
 			constexpr static function_code fc = FunctionCode;
 		};
 
-		// template<function_code FunctionCode>
-		// constexpr function_code pdu_base<FunctionCode>::fc;
 
-		using pdu_req = variant<read_holding_pdu_req, read_input_pdu_req, not_implemented>;
+		using pdu_req = variant<
+			read_coils_pdu_req,
+			read_discrete_inputs_pdu_req,
+			read_holding_pdu_req,
+			read_input_pdu_req,
+			write_single_coil_pdu_req,
+			write_single_register_pdu_req,
+			not_implemented
+		>;
 
 
 		namespace detail
