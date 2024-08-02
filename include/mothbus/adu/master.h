@@ -80,6 +80,45 @@ namespace mothbus
 				}
 				return{};
 			}
+			/*!
+			 * \brief			write multiple coils function. (0x0F)
+			 * \param			slave		slave(or unit id)
+			 * \param			address		write (pdu) address. 0x0000 to 0xFFFF.
+			 * \param			values		write values. quantity is 0x0001 to 0x07B0.
+			 */
+			error_code write_multiple_coils(uint8_t slave, uint16_t address, span<byte> values)
+			{
+				assert(1 <= values.size() && values.size() <= 1968);
+
+				pdu::write_multiple_coils_pdu_req req;
+				req.starting_address = address;
+				req.quantity_of_coils = static_cast<uint16_t>(values.size());
+				req.byte_count = (req.quantity_of_coils - 1) / 8 + 1;
+
+				std::vector<byte> v(req.byte_count, byte{ 0 });
+				for (size_t i = 0; i < v.size(); ++i) {
+					const auto start = i * 8;
+					const auto sentinel = (std::min)((i + 1) * 8, values.size());
+					std::span<byte> coils(values.data() + start, values.data() + sentinel);
+
+					std::uint8_t pack = 0;
+					for (size_t c = 0; c < coils.size(); ++c) {
+						pack += (static_cast<std::uint8_t>(coils[c]) << c);
+					}
+					v[i] = byte(pack);
+				}
+				req.values = v;
+
+				const auto transaction_id = m_stream.write_request(slave, req);
+
+
+				pdu::write_multiple_coils_pdu_resp resp;
+				auto ec = m_stream.read_response(transaction_id, slave, resp);
+				if (!!ec) {
+					return ec;
+				}
+				return{};
+			}
 
 			/*!
 			 * \brief			read discrete inputs function. (0x02)
