@@ -52,14 +52,15 @@ namespace mothbus
 			template <class Resp>
 			void receive_response(uint8_t expectedSlave, Resp& out, boost::system::error_code& ec)
 			{
+				using pdu::read;
+
 				adu::buffer source(m_messageBuffer);
-				auto readBuffer = boost::asio::buffer(m_messageBuffer);
 				size_t readSize = 0;
 				readSize += mothbus::read(m_next_layer, source.prepare(255), ec);
 				source.commit(readSize);
-				pdu::reader<adu::buffer> reader(source);
+
 				uint8_t receivedSlave;
-				pdu::read(reader, receivedSlave);
+				read(source, receivedSlave);
 				if (receivedSlave != expectedSlave) {
 					return;
 				}
@@ -72,7 +73,7 @@ namespace mothbus
 				}*/
 				source.commit(readSize);
 				pdu::pdu_resp<Resp> combinedResponse{out};
-				pdu::read(reader, combinedResponse);
+				read(source, combinedResponse);
 			}
 		private:
 			std::array<uint8_t, 320> m_messageBuffer;
