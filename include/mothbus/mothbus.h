@@ -9,13 +9,8 @@
 
 namespace mothbus
 {
-	template<class ...T>
-	using variant = std::variant<T...>;
-
-
-	template<class T>
-	using span = std::span<T>;
-
+	template<class ...T> using variant = std::variant<T...>;
+	template<class T> using span = std::span<T>;
 	using byte = std::byte;
 
 
@@ -58,4 +53,23 @@ namespace mothbus
 
 		int error_code;
 	};
+
+
+	namespace util
+	{
+		/*!
+		 * \brief		In little-endian environments, src is byte-swapped before copying.
+		 */
+		inline void memcpy_msb(span<byte> dst, span<std::uint16_t> src)
+		{
+			assert(src.size() * 2 == dst.size());
+			std::memcpy(dst.data(), src.data(), dst.size());
+
+			if constexpr (std::endian::native == std::endian::little) {
+				for (size_t i = 0; i < dst.size(); i += 2) {
+					std::ranges::swap(dst[i], dst[i + 1]);
+				}
+			}
+		};
+	} // namespace util
 } // namespace mothbus
