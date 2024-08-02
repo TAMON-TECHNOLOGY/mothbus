@@ -218,7 +218,7 @@ namespace mothbus
 			}
 
 		private:
-			std::array<uint8_t, 320> m_message_buffer;
+			std::array<uint8_t, 320> m_message_buffer = { 0 };
 			NextLayer& m_next_layer;
 			uint16_t m_protocol = 0;
 			uint16_t m_transaction_id = 0;

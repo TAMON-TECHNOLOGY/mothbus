@@ -1,8 +1,8 @@
 #pragma once
-#include <mothbus/mothbus.h>
-#include <mothbus/pdu.h>
-#include <mothbus/adu/buffer.h>
-#include <mothbus/adu/master.h>
+#include "../mothbus.h"
+#include "../pdu.h"
+#include "buffer.h"
+#include "master.h"
 
 #include "crc.h"
 

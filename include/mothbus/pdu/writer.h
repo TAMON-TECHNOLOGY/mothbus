@@ -1,5 +1,6 @@
 #pragma once
-#include <mothbus/mothbus.h>
+//#include <mothbus/mothbus.h>
+#include "../mothbus.h"
 
 
 namespace mothbus::pdu

@@ -75,7 +75,7 @@ namespace mothbus
 		{
 			template <class Head, class ...Tail, class Reader>
 			typename std::enable_if<std::is_same<Head, not_implemented>::value, error_code>::type
-				read_pdu_variant(Reader& reader, pdu_req& resp, [[maybe_unused]] function_code functionCode)
+				read_pdu_variant([[maybe_unused]] Reader& reader, pdu_req& resp, [[maybe_unused]] function_code functionCode)
 			{
 				resp = not_implemented{};
 				return make_error_code(modbus_exception_code::illegal_function);

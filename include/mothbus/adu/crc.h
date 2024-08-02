@@ -1,5 +1,5 @@
 #pragma once
-#include <mothbus/mothbus.h>
+#include "../mothbus.h"
 
 // copied from http://modbus.org/docs/Modbus_over_serial_line_V1_02.pdf
 // TODO: replace with own code
@@ -62,7 +62,7 @@ unsigned short CRC16(span<uint8_t> msg)
 	unsigned char uchCRCHi = 0xFF;
 	unsigned char uchCRCLo = 0xFF;
 	unsigned uIndex;
-	unsigned short len = msg.size();
+	size_t len = msg.size();
 	size_t i = 0;
 	while (len--)
 	{
