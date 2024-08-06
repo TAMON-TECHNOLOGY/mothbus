@@ -40,6 +40,16 @@ namespace mothbus::pdu
     }
 
     template <class Reader>
+    error_code read(Reader& reader, span<uint16_t>& v)
+    {
+        for (auto& u : v)
+        {
+            { auto ec = read(reader, u); if (!!ec) return ec; }
+        }
+        return{};
+    }
+
+    template <class Reader>
     error_code read(Reader& reader, modbus_exception_code& v)
     {
         uint8_t h = 0;
