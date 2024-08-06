@@ -60,6 +60,15 @@ namespace mothbus::pdu
         }
     }
 
+     template <class Writer>
+    inline void write(Writer& writer, const span<uint16_t>& v)
+    {
+        for (const auto u : v)
+        {
+            writer.write(u);
+        }
+    }
+
     template <class Writer>
     void write(Writer& writer, const modbus_exception_code& v)
     {

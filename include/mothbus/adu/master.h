@@ -200,6 +200,28 @@ namespace mothbus
 				}
 				return{};
 			}
+			/*!
+			 * \brief			write multiple registers function. (0x10)
+			 * \param			slave		slave(or unit id)
+			 * \param			address		write (pdu) address. 0x0000 to 0xFFFF.
+			 * \param			value		write values. quantity is 0x0001 to 0x007B.
+			 */
+			error_code write_multiple_registers(uint8_t slave, uint16_t address, span<uint16_t> values)
+			{
+				pdu::write_multiple_registers_pdu_req req;
+				req.starting_address = address;
+				req.quantity_of_registers = static_cast<uint16_t>(values.size());
+				req.byte_count = req.quantity_of_registers * 2;
+				req.values = values;
+				const auto transaction_id = m_stream.write_request(slave, req);
+
+				pdu::write_multiple_registers_pdu_resp resp;
+				auto ec = m_stream.read_response(transaction_id, slave, resp);
+				if (!!ec) {
+					return ec;
+				}
+				return{};
+			}
 
 			// 0x04
 			error_code read_input_registers(uint8_t slave, uint16_t address, span<byte> out)
