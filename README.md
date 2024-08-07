@@ -1,6 +1,6 @@
 # mothbus, a c++17 library for the modbus protocol
 
-[![Build Status](https://travis-ci.org/ChrisBFX/mothbus.svg?branch=master)](https://travis-ci.org/ChrisBFX/mothbus)
+Original code is [here](https://github.com/ChrisBFX/mothbus).
 
 ## Introduction
 
