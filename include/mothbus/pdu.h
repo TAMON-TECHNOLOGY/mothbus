@@ -23,6 +23,7 @@ namespace mothbus
 			write_single_register,
 			write_multiple_coils = 0x0F,
 			write_multiple_registers,
+			read_write_multiple_registers = 0x17,
 		};
 
 		template <class Reader>
@@ -52,6 +53,9 @@ namespace mothbus
 		class write_multiple_registers_pdu_req;
 		class write_multiple_registers_pdu_resp;
 
+		class read_write_multiple_registers_pdu_req;
+		class read_write_multiple_registers_pdu_resp;
+
 		class not_implemented
 		{
 		public:
@@ -75,6 +79,7 @@ namespace mothbus
 			write_single_register_pdu_req,
 			write_multiple_coils_pdu_req,
 			write_multiple_registers_pdu_req,
+			read_write_multiple_registers_pdu_req,
 			not_implemented
 		>;
 
@@ -196,3 +201,6 @@ namespace mothbus
 #include "pdu/resp_writing_multiple_coils.h"
 #include "pdu/req_writing_multiple_registers.h"
 #include "pdu/resp_writing_multiple_registers.h"
+
+#include "pdu/req_reading_writing_multiple_registers.h"
+#include "pdu/resp_reading_writing_multiple_registers.h"

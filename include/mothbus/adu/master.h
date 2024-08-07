@@ -222,6 +222,34 @@ namespace mothbus
 				}
 				return{};
 			}
+			/*!
+			 * \brief			read/write multiple registers function. (0x17)
+			 * \param			slave			slave(or unit id)
+			 * \param			read_address	(pdu) read starting address. 0x0000 to 0xFFFF.
+			 * \param[out]		read_values		read values. quantity is 0x0001 to 0x007D.
+			 * \param			write_address	(pdu) write starting address. 0x0000 to 0xFFFF.
+			 * \param[in]		write_values	write values. quantity is 0x0001 to 0x0079.
+			 *
+			 * The write operation is performed before the read.
+			 */
+			error_code read_write_multiple_registers(uint8_t slave, uint16_t read_address, span<uint16_t> read_values, uint16_t write_address, span<const uint16_t> write_values)
+			{
+				pdu::read_write_multiple_registers_pdu_req req;
+				req.read_starting_address = read_address;
+				req.read_quantity_of_registers = static_cast<uint16_t>(read_values.size());
+				req.write_starting_address = read_address;
+				req.write_quantity_of_registers = static_cast<uint16_t>(write_values.size());
+				req.write_byte_count = req.write_quantity_of_registers * 2;
+				req.values = write_values;
+				const auto transaction_id = m_stream.write_request(slave, req);
+
+				pdu::read_write_multiple_registers_pdu_resp resp;
+				auto ec = m_stream.read_response(transaction_id, slave, resp);
+				if (!!ec) {
+					return ec;
+				}
+				return{};
+			}
 
 			// 0x04
 			error_code read_input_registers(uint8_t slave, uint16_t address, span<byte> out)
