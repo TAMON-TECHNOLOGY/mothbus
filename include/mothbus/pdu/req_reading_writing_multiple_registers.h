@@ -50,7 +50,7 @@ namespace mothbus
             writer.write(v.write_starting_address);
 			writer.write(v.write_quantity_of_registers);
 			writer.write(v.write_byte_count);
-			writer.write(v.values);
+			for (const auto reg : v.values) { writer.write(reg); }
 		}
 	} // namespace pdu
 } // namespace mothbus

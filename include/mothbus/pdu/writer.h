@@ -60,7 +60,7 @@ namespace mothbus::pdu
         }
     }
 
-     template <class Writer>
+    template <class Writer>
     inline void write(Writer& writer, const span<uint16_t>& v)
     {
         for (const auto u : v)

@@ -50,7 +50,7 @@ namespace mothbus
 				req.quantity_of_coils = quantity; 
 				const auto transaction_id = m_stream.write_request(slave, req);
 
-				pdu::read_coils_pdu_resp resp;
+				pdu::read_coils_pdu_resp resp(out);
 				auto ec = m_stream.read_response(transaction_id, slave, resp);
 				if (!!ec) {
 					return ec;
@@ -73,7 +73,7 @@ namespace mothbus
 				req.value = value ? 0xFF00 : 0x0000; 
 				const auto transaction_id = m_stream.write_request(slave, req);
 
-				pdu::write_single_coil_pdu_resp resp;
+				pdu::write_single_coil_pdu_resp resp(req.address, req.value);
 				auto ec = m_stream.read_response(transaction_id, slave, resp);
 				if (!!ec) {
 					return ec;
@@ -193,7 +193,7 @@ namespace mothbus
 				req.value = value;
 				const auto transaction_id = m_stream.write_request(slave, req);
 
-				pdu::write_single_register_pdu_resp resp;
+				pdu::write_single_register_pdu_resp resp(req.address, req.value);
 				auto ec = m_stream.read_response(transaction_id, slave, resp);
 				if (!!ec) {
 					return ec;
@@ -211,11 +211,12 @@ namespace mothbus
 				pdu::write_multiple_registers_pdu_req req;
 				req.starting_address = address;
 				req.quantity_of_registers = static_cast<uint16_t>(values.size());
-				req.byte_count = req.quantity_of_registers * 2;
-				req.values = values;
+				req.byte_count = static_cast<uint8_t>(req.quantity_of_registers * 2);
+				req.values.resize(req.quantity_of_registers);
+				std::ranges::copy(values, req.values.begin());
 				const auto transaction_id = m_stream.write_request(slave, req);
 
-				pdu::write_multiple_registers_pdu_resp resp;
+				pdu::write_multiple_registers_pdu_resp resp(req.starting_address, req.quantity_of_registers);
 				auto ec = m_stream.read_response(transaction_id, slave, resp);
 				if (!!ec) {
 					return ec;
@@ -237,18 +238,24 @@ namespace mothbus
 				pdu::read_write_multiple_registers_pdu_req req;
 				req.read_starting_address = read_address;
 				req.read_quantity_of_registers = static_cast<uint16_t>(read_values.size());
-				req.write_starting_address = read_address;
+				req.write_starting_address = write_address;
 				req.write_quantity_of_registers = static_cast<uint16_t>(write_values.size());
-				req.write_byte_count = req.write_quantity_of_registers * 2;
-				req.values = write_values;
+				req.write_byte_count = static_cast<uint8_t>(req.write_quantity_of_registers * 2);
+				req.values.resize(req.write_quantity_of_registers);
+				std::ranges::copy(write_values, req.values.begin());
 				const auto transaction_id = m_stream.write_request(slave, req);
 
-				pdu::read_write_multiple_registers_pdu_resp resp;
+
+				std::vector<byte> buffer(read_values.size() * 2);
+
+				pdu::read_write_multiple_registers_pdu_resp resp(buffer);
 				auto ec = m_stream.read_response(transaction_id, slave, resp);
-				if (!!ec) {
-					return ec;
+				if (!ec) {
+					for (size_t i = 0; i < read_values.size(); ++i) {
+						read_values[i] = detail::make_uint16(buffer[2 * i + 0], buffer[2 * i + 1]);
+					}
 				}
-				return{};
+				return ec;
 			}
 
 			// 0x04
