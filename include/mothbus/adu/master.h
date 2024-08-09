@@ -93,7 +93,7 @@ namespace mothbus
 				pdu::write_multiple_coils_pdu_req req;
 				req.starting_address = address;
 				req.quantity_of_coils = static_cast<uint16_t>(values.size());
-				req.byte_count = (req.quantity_of_coils - 1) / 8 + 1;
+				req.byte_count = static_cast<uint8_t>((req.quantity_of_coils - 1) / 8 + 1);
 
 				std::vector<byte> v(req.byte_count, byte{ 0 });
 				for (size_t i = 0; i < v.size(); ++i) {
@@ -112,7 +112,7 @@ namespace mothbus
 				const auto transaction_id = m_stream.write_request(slave, req);
 
 
-				pdu::write_multiple_coils_pdu_resp resp;
+				pdu::write_multiple_coils_pdu_resp resp(req.starting_address, req.quantity_of_coils);
 				auto ec = m_stream.read_response(transaction_id, slave, resp);
 				if (!!ec) {
 					return ec;
@@ -139,7 +139,7 @@ namespace mothbus
 				req.quantity_of_discrete_inputs = quantity;
 				const auto transaction_id = m_stream.write_request(slave, req);
 
-				pdu::read_discrete_inputs_pdu_resp resp;
+				pdu::read_discrete_inputs_pdu_resp resp(out);
 				auto ec = m_stream.read_response(transaction_id, slave, resp);
 				if (!!ec) {
 					return ec;
@@ -168,7 +168,7 @@ namespace mothbus
 				}
 				return{};
 			}
-			error_code read_registers(uint8_t slave, uint16_t address, span<std::uint16_t> out)
+			error_code read_registers(uint8_t slave, uint16_t address, span<uint16_t> out)
 			{
 				std::vector<byte> buffer(out.size() * 2);
 				auto ec = read_registers(slave, address, buffer);

@@ -44,7 +44,9 @@ namespace mothbus
 			writer.write(v.starting_address);
 			writer.write(v.quantity_of_coils);
 			writer.write(v.byte_count);
-			writer.write(v.values);
+			for (auto b : v.values) {
+				writer.write(b);
+			}
 		}
 	} // namespace pdu
 } // namespace mothbus

@@ -34,6 +34,11 @@ namespace mothbus::pdu
             m_sink.put(v);
         }
 
+        inline void write(byte v)
+        {
+            m_sink.put(static_cast<uint8_t>(v));
+        }
+
 
     private:
         Sink& m_sink;
