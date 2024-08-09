@@ -12,8 +12,8 @@ namespace mothbus
 		class read_holding_pdu_req : public pdu_base<function_code::read_holding_registers>
 		{
 		public:
-			uint16_t starting_address;
-			uint16_t quantity_of_registers;
+			uint16_t starting_address{ 0 };
+			uint16_t quantity_of_registers{ 0 };
 		};
 
 

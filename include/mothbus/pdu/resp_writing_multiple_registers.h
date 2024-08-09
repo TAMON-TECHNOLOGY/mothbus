@@ -27,8 +27,8 @@ namespace mothbus
 				assert(1 <= quantity_of_registers && quantity_of_registers <= 123);
 			}
 
-			uint16_t starting_address;
-			uint16_t quantity_of_registers;
+			uint16_t starting_address{ 0 };
+			uint16_t quantity_of_registers{ 0 };
 		};
 
 

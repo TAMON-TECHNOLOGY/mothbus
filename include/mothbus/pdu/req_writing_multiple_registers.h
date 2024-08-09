@@ -16,9 +16,9 @@ namespace mothbus
 		class write_multiple_registers_pdu_req : public pdu_base<function_code::write_multiple_registers>
 		{
 		public:
-			uint16_t starting_address;
-			uint16_t quantity_of_registers;
-			uint8_t byte_count;
+			uint16_t starting_address{ 0 };
+			uint16_t quantity_of_registers{ 0 };
+			uint8_t byte_count{ 0 };
 			std::vector<uint16_t> values; // native endian
 		};
 

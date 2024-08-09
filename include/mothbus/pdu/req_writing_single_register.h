@@ -15,8 +15,8 @@ namespace mothbus
 		class write_single_register_pdu_req : public pdu_base<function_code::write_single_register>
 		{
 		public:
-			uint16_t address;
-			uint16_t value;
+			uint16_t address{ 0 };
+			uint16_t value{ 0 };
 		};
 
 

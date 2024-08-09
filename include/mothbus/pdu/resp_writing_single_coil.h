@@ -21,8 +21,8 @@ namespace mothbus
                 assert(value == 0x0000 || value == 0xFF00);
 			}
 
-			uint16_t address;
-			uint16_t value;
+			uint16_t address{ 0 };
+			uint16_t value{ 0 };
 		};
 
 

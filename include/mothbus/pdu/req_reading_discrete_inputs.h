@@ -15,8 +15,8 @@ namespace mothbus
 		class read_discrete_inputs_pdu_req : public pdu_base<function_code::read_discrete_inputs>
 		{
 		public:
-			uint16_t starting_address;
-			uint16_t quantity_of_discrete_inputs;
+			uint16_t starting_address{ 0 };
+			uint16_t quantity_of_discrete_inputs{ 0 };
 		};
 
 

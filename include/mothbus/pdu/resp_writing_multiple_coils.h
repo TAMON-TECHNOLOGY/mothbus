@@ -27,8 +27,8 @@ namespace mothbus
 				assert(1 <= quantity_of_coils && quantity_of_coils <= 1968);
 			}
 
-			uint16_t starting_address;
-			uint16_t quantity_of_coils;
+			uint16_t starting_address{ 0 };
+			uint16_t quantity_of_coils{ 0 };
 		};
 
 

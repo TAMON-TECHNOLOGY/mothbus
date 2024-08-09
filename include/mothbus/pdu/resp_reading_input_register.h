@@ -18,7 +18,7 @@ namespace mothbus
 			{
 			}
 
-			uint8_t byte_count;
+			uint8_t byte_count{ 0 };
 			span<byte> values;
 		};
 

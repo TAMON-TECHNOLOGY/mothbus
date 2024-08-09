@@ -20,8 +20,8 @@ namespace mothbus
 			{
 			}
 
-			uint16_t address;
-			uint16_t value;
+			uint16_t address{ 0 };
+			uint16_t value{ 0 };
 		};
 
 

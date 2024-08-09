@@ -76,7 +76,7 @@ namespace mothbus
 				read(source, combinedResponse);
 			}
 		private:
-			std::array<uint8_t, 320> m_messageBuffer;
+			std::array<uint8_t, 320> m_messageBuffer = { 0 };
 			NextLayer& m_next_layer;
 		};
 	} // namespace rtu

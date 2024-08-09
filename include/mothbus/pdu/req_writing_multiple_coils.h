@@ -16,9 +16,9 @@ namespace mothbus
 		class write_multiple_coils_pdu_req : public pdu_base<function_code::write_multiple_coils>
 		{
 		public:
-			uint16_t starting_address;
-			uint16_t quantity_of_coils;
-			uint8_t byte_count;
+			uint16_t starting_address{ 0 };
+			uint16_t quantity_of_coils{ 0 };
+			uint8_t byte_count{ 0 };
 			std::vector<byte> values;
 		};
 

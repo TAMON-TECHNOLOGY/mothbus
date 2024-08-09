@@ -15,8 +15,8 @@ namespace mothbus
 		class write_single_coil_pdu_req : public pdu_base<function_code::write_single_coil>
 		{
 		public:
-			uint16_t address;
-			uint16_t value;     // 0x0000 or 0xFF00
+			uint16_t address{ 0 };
+			uint16_t value{ 0 };     // 0x0000 or 0xFF00
 		};
 
 
@@ -32,7 +32,7 @@ namespace mothbus
 		template <class Writer>
 		void write(Writer& writer, const write_single_coil_pdu_req& v)
 		{
-            assert(v.value == 0x0000 || v.value == 0xFF00);
+			assert(v.value == 0x0000 || v.value == 0xFF00);
 
 			write(writer, write_single_coil_pdu_req::fc);
 			writer.write(v.address);
