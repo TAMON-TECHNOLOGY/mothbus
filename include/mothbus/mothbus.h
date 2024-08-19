@@ -44,16 +44,6 @@ namespace mothbus
 		boost::asio::async_read(s, buffers, std::forward<ReadHandler>(handler));
 	}
 
-	class modbus_exception// : public std::runtime_error
-	{
-	public:
-		modbus_exception(int error_code):
-		error_code(error_code)
-		{}
-
-		int error_code;
-	};
-
 
 	namespace util
 	{

@@ -69,7 +69,6 @@ namespace mothbus
 				if (length + 6 > 255 || length <= 1)
 				{
 					return;
-					//throw modbus_exception(10);
 				}*/
 				source.commit(readSize);
 				pdu::pdu_resp<Resp> combinedResponse{out};
