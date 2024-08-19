@@ -14,7 +14,7 @@ namespace mothbus
 		class read_discrete_inputs_pdu_resp : public pdu_base<function_code::read_discrete_inputs>
 		{
 		public:
-			read_discrete_inputs_pdu_resp(span<byte> v)
+			explicit read_discrete_inputs_pdu_resp(span<byte> v)
 				: values(v)
 				, byte_count(static_cast<uint8_t>(v.size()))
 			{

@@ -15,7 +15,7 @@ namespace mothbus::pdu
     class writer
     {
     public:
-        writer(Sink& sink)
+        explicit writer(Sink& sink)
             : m_sink(sink)
         {
         };

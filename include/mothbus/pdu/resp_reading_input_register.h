@@ -12,7 +12,7 @@ namespace mothbus
 		class read_input_pdu_resp : public pdu_base<function_code::read_input_registers>
 		{
 		public:
-			read_input_pdu_resp(span<byte> v)
+			explicit read_input_pdu_resp(span<byte> v)
 				: values(v),
 				  byte_count(static_cast<uint8_t>(v.size()))
 			{

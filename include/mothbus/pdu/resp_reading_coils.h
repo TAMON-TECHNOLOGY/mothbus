@@ -14,7 +14,7 @@ namespace mothbus
 		class read_coils_pdu_resp : public pdu_base<function_code::read_coils>
 		{
 		public:
-			read_coils_pdu_resp(span<byte> v)
+			explicit read_coils_pdu_resp(span<byte> v)
 				: values(v)
 				, byte_count(static_cast<uint8_t>(v.size()))
 			{

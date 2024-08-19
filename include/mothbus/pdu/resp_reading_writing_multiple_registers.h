@@ -15,7 +15,7 @@ namespace mothbus
 		class read_write_multiple_registers_pdu_resp : public pdu_base<function_code::read_write_multiple_registers>
 		{
 		public:
-			read_write_multiple_registers_pdu_resp(span<byte> v)
+			explicit read_write_multiple_registers_pdu_resp(span<byte> v)
 				: values(v),
 				  byte_count(static_cast<uint8_t>(v.size()))
 			{
