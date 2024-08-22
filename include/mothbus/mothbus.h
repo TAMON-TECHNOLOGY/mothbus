@@ -3,7 +3,6 @@
 #include <cstddef> // for std::byte
 #include <span>
 #include <variant>
-#include <boost/system/system_error.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 
