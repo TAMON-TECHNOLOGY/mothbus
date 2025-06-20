@@ -91,6 +91,11 @@ namespace mothbus
 			template <class Resp>
 			error_code read_response(uint16_t expected_transaction_id, uint8_t expected_slave, Resp& out)
 			{
+				if (expected_slave == 0) { // boradcast
+					ec.clear();
+					return;
+				}
+
 				using pdu::read;
 				adu::buffer source(m_message_buffer);
 				size_t read_size = 0;

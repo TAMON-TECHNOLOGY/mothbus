@@ -57,6 +57,11 @@ namespace mothbus
 			template <class Resp>
 			void receive_response(uint8_t expectedSlave, Resp& out, error_code& ec)
 			{
+				if (expected_slave == 0) { // boradcast
+					ec.clear();
+					return;
+				}
+
 				using pdu::read;
 				adu::buffer source(m_messageBuffer);
 
