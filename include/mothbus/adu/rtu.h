@@ -19,13 +19,14 @@ namespace mothbus
 
 			stream(NextLayer& next_layer)
 				: m_next_layer(next_layer)
+				, m_io_context(static_cast<boost::asio::io_context&>(next_layer.get_executor().context()))
 			{
 			}
 
 			template <class Req>
 			uint16_t write_request(uint8_t slave, const Req& request)
 			{
-				adu::buffer sink{m_messageBuffer};
+				adu::buffer sink{ m_messageBuffer };
 				pdu::writer<adu::buffer> writer(sink);
 				pdu::write(writer, slave);
 				pdu::write(writer, request);
@@ -45,7 +46,7 @@ namespace mothbus
 			}
 
 
-			// arrange interface for master_base
+			// maybe not called in slave mode
 			template <class Resp>
 			error_code read_response(uint16_t, uint8_t expected_slave, Resp& out)
 			{
@@ -54,39 +55,85 @@ namespace mothbus
 				return ec;
 			}
 			template <class Resp>
-			void receive_response(uint8_t expectedSlave, Resp& out, boost::system::error_code& ec)
+			void receive_response(uint8_t expectedSlave, Resp& out, error_code& ec)
 			{
 				using pdu::read;
-
-				// TODO: タイムアウト対応
-				//       - inter-frame delay (t3.5)
-				//       - the inter-character time-out (t1.5)
-				//       1フレーム分取得し切ってから、後続の処理に回す. フレーム破棄もここで行う.
-
 				adu::buffer source(m_messageBuffer);
-				size_t readSize = 0;
-				readSize += mothbus::read(m_next_layer, source.prepare(1), ec);
+
+				std::size_t readSize = read_byte_with_timeout(source, std::chrono::microseconds(m_timeoutResponse));
+				if (!readSize) {
+					ec = make_error_code(boost::system::errc::timed_out);
+					return;
+				}
 				source.commit(readSize);
+
 
 				uint8_t receivedSlave;
 				read(source, receivedSlave);
 				if (receivedSlave != expectedSlave) {
+					ec = make_error_code(boost::system::errc::protocol_error);
 					return;
 				}
 
-				/*readSize = mothbus::read(stream, source.prepare(254), ec);
-				if (length + 6 > 255 || length <= 1)
-				{
-					return;
-				}*/
-				source.commit(readSize);
-				pdu::pdu_resp<Resp> combinedResponse{out};
+
+				while (true) {
+					readSize = read_byte_with_timeout(source, std::chrono::microseconds(m_timeoutInterCharacter));
+
+					if (!readSize) {
+						break;
+					}
+					source.commit(readSize);
+				} // while (true)
+
+
+				pdu::pdu_resp<Resp> combinedResponse{ out };
 				read(source, combinedResponse);
+
+				ec.clear();
 			}
+
+		private:
+			/*!
+			 * \brief タイムアウト付きで1バイトを非同期に読み込む
+			 * \param source 読み込み先のバッファ
+			 * \param timeout タイムアウト時間
+			 * \return 読み込んだバイト数. タイムアウトまたはエラーの場合は0を返す
+			 */
+			std::size_t read_byte_with_timeout(adu::buffer& source, std::chrono::microseconds timeout)
+			{
+				boost::asio::steady_timer timer{ m_io_context };
+				timer.expires_from_now(timeout);
+
+				std::size_t bytes_read = 0;
+
+				mothbus::async_read(m_next_layer, source.prepare(1),
+					[&timer, &bytes_read](const boost::system::error_code& e, std::size_t size) {
+						if (!e && size > 0) {
+							bytes_read = size;
+							timer.cancel();
+						}
+					});
+				timer.async_wait(
+					[this](const boost::system::error_code& e) {
+						if (e != boost::asio::error::operation_aborted) {
+							m_next_layer.cancel();
+						}
+					});
+
+				m_io_context.run();
+				m_io_context.reset(); // for next call
+
+				return bytes_read;
+			}
+
 		private:
 			std::array<uint8_t, 320> m_messageBuffer = { 0 };
 			NextLayer& m_next_layer;
-			uint16_t m_transaction_id = 0;
+			uint16_t m_transaction_id{ 0 };
+			boost::asio::io_context& m_io_context;
+			std::uint32_t m_timeoutInterCharacter{ 1800 }; // [us], T1.5
+			//std::uint32_t m_timeoutInterFrame{ 4000 }; // [us], T3.5
+			std::uint32_t m_timeoutResponse{ 10000 }; // [us]
 		};
 	} // namespace rtu
 
