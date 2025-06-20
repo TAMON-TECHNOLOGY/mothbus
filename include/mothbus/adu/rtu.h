@@ -89,6 +89,17 @@ namespace mothbus
 				pdu::pdu_resp<Resp> combinedResponse{ out };
 				read(source, combinedResponse);
 
+
+				const uint16_t crc = CRC16(span{ m_messageBuffer.data(), source.input_start });
+				std::uint8_t rcvCrcL;
+				std::uint8_t rcvCrcH;
+				read(source, rcvCrcL);
+				read(source, rcvCrcH);
+				if (rcvCrcL != (crc & 0xff) || rcvCrcH != ((crc >> 8) & 0xff)) {
+					ec = make_error_code(modbus_exception_code::invalid_response);
+					return;
+				}
+
 				ec.clear();
 			}
 
