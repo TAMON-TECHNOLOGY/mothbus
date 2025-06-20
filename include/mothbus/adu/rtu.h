@@ -71,7 +71,7 @@ namespace mothbus
 				uint8_t receivedSlave;
 				read(source, receivedSlave);
 				if (receivedSlave != expectedSlave) {
-					ec = make_error_code(boost::system::errc::protocol_error);
+					ec = make_error_code(modbus_exception_code::slave_id_invalid);
 					return;
 				}
 
