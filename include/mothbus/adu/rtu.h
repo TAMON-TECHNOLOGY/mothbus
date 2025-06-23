@@ -57,7 +57,7 @@ namespace mothbus
 			template <class Resp>
 			void receive_response(uint8_t expectedSlave, Resp& out, error_code& ec)
 			{
-				if (expected_slave == 0) { // boradcast
+				if (expectedSlave == 0) { // boradcast
 					ec.clear();
 					return;
 				}
