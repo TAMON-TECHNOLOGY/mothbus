@@ -17,6 +17,9 @@ namespace mothbus
 		 * \brief Modbus/TCP Application Protocol (MBAP) ヘッダー構造体
 		 */
 		struct mbap_header {
+			static constexpr std::size_t header_size = 7;
+			static constexpr std::size_t max_adu_size = 260;
+
 			std::uint16_t transaction_id;
 			std::uint16_t protocol;
 			std::uint16_t length;
@@ -25,6 +28,14 @@ namespace mothbus
 			mbap_header() noexcept
 				: transaction_id(0), protocol(0), length(0), unit_id(0)
 			{}
+
+			/*!
+			 * \brief length が適切な長さかを調べます
+			 */
+			bool is_valid_length() const noexcept {
+				// 1(UnitID) + 1(Min PDU) = 2バイト以上、かつ全体のサイズが max_adu_size を超えないこと
+				return length >= 2 && (length + (header_size - 1) <= max_adu_size);
+			}
 		};
 
 		/*!
@@ -113,7 +124,7 @@ namespace mothbus
 				using pdu::read;
 				adu::buffer source(m_message_buffer);
 				size_t read_size = 0;
-				read_size += mothbus::read(m_next_layer, source.prepare(7));
+				read_size += mothbus::read(m_next_layer, source.prepare((mbap_header::header_size));
 				source.commit(read_size);
 				uint16_t received_transaction_id = 0;
 				uint16_t protocol = 0;
@@ -173,17 +184,17 @@ namespace mothbus
 
 					// read MBAP
 					const mbap_header header = tcp::parse_header(source, size);
+					if (!header.is_valid_length())
+					{
+						callback(0, 0, make_error_code(modbus_exception_code::request_too_big));
+						return;
+					}
+
 					transaction_id = header.transaction_id;
 					protocol = header.protocol;
 					length = header.message_length;
 					slave = header.unit_id;
 
-					// TODO: max length size is 254. (max adu size is 260. MBAP size is 7. "length" include "slave".)
-					if (length + 6 > 255 || length <= 1)
-					{
-						callback(0, 0, make_error_code(modbus_exception_code::request_too_big));
-						return;
-					}
 					mothbus::async_read(next_layer, source.prepare(length - 1), [op = std::move(*this)](auto ec, size_t read_size) mutable
 					{
 						if (!!ec) {
@@ -206,7 +217,7 @@ namespace mothbus
 			void async_read_request(pdu::pdu_req& request, Callback&& callback)
 			{
 				request_read_op<Callback> op(m_next_layer, m_message_buffer, request, std::forward<Callback>(callback));
-				mothbus::async_read(m_next_layer, op.source.prepare(7), [op = std::move(op)](auto ec, size_t read_size) mutable
+				mothbus::async_read(m_next_layer, op.source.prepare((mbap_header::header_size), [op = std::move(op)](auto ec, size_t read_size) mutable
 				{
 					if (!!ec) {
 						op.callback(0, 0, ec);
