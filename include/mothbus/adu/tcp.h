@@ -14,29 +14,44 @@ namespace mothbus
 	namespace tcp
 	{
 		/*!
+		 * \brief Modbus/TCP Application Protocol (MBAP) ヘッダー構造体
+		 */
+		struct mbap_header {
+			std::uint16_t transaction_id;
+			std::uint16_t protocol;
+			std::uint16_t length;
+			std::uint8_t unit_id;
+
+			mbap_header() noexcept
+				: transaction_id(0), protocol(0), length(0), unit_id(0)
+			{}
+		};
+
+		/*!
 		 * \brief			parse MBAP header
 		 * \return			<transaction_id, protocol, message_length, message_length, unit_id>
 		 *
 		 * if there is no define type or set variant correspoinding to read function code,
 		 * set req to \a not_implemented .
 		 */
-		inline std::tuple<std::uint16_t, std::uint16_t, std::uint16_t, std::uint8_t>
+		inline mbap_header
 			parse_header(adu::buffer& source, std::size_t read_size)
 		{
 			using mothbus::pdu::read;
 
-			std::uint16_t transaction_id = 0;
+			mbap_header header;
+			header.transaction_id = 0;
 			std::uint16_t protocol = 0;
 			std::uint16_t message_length = 0;
 			std::uint8_t unit_id = 0;
 
 			source.commit(read_size);
-			read(source, transaction_id);
-			read(source, protocol);
-			read(source, message_length);
-			read(source, unit_id);
+			read(source, header.transaction_id);
+			read(source, header.protocol);
+			read(source, header.message_length);
+			read(source, header.unit_id);
 
-			return { transaction_id , protocol, message_length, unit_id};
+			return h;
 		}
 
 		/*!
@@ -157,8 +172,11 @@ namespace mothbus
 					using pdu::read;
 
 					// read MBAP
-					std::tie(transaction_id, protocol, length, slave)
-						= tcp::parse_header(source, size);
+					const mbap_header header = tcp::parse_header(source, size);
+					transaction_id = header.transaction_id;
+					protocol = header.protocol;
+					length = header.message_length;
+					slave = header.unit_id;
 
 					// TODO: max length size is 254. (max adu size is 260. MBAP size is 7. "length" include "slave".)
 					if (length + 6 > 255 || length <= 1)
