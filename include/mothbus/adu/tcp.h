@@ -92,8 +92,7 @@ namespace mothbus
 			error_code read_response(uint16_t expected_transaction_id, uint8_t expected_slave, Resp& out)
 			{
 				if (expected_slave == 0) { // boradcast
-					ec.clear();
-					return;
+					return make_error_code(modbus_exception_code::success);
 				}
 
 				using pdu::read;
@@ -127,7 +126,8 @@ namespace mothbus
 				source.commit(read_size);
 				pdu::pdu_resp<Resp> combined_response{out};
 				MOTH_CHECKED_RETURN(read(source, combined_response)); // call read function in pdu/resp_*.h
-				return{};
+				
+				return make_error_code(modbus_exception_code::success);
 			}
 
 
