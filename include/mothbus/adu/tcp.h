@@ -40,7 +40,7 @@ namespace mothbus
 
 		/*!
 		 * \brief			parse MBAP header
-		 * \return			<transaction_id, protocol, message_length, message_length, unit_id>
+		 * \return			MBAP header
 		 *
 		 * if there is no define type or set variant correspoinding to read function code,
 		 * set req to \a not_implemented .
@@ -51,18 +51,14 @@ namespace mothbus
 			using mothbus::pdu::read;
 
 			mbap_header header;
-			header.transaction_id = 0;
-			std::uint16_t protocol = 0;
-			std::uint16_t message_length = 0;
-			std::uint8_t unit_id = 0;
 
 			source.commit(read_size);
 			read(source, header.transaction_id);
 			read(source, header.protocol);
-			read(source, header.message_length);
+			read(source, header.length);
 			read(source, header.unit_id);
 
-			return h;
+			return header;
 		}
 
 		/*!
@@ -124,7 +120,7 @@ namespace mothbus
 				using pdu::read;
 				adu::buffer source(m_message_buffer);
 				size_t read_size = 0;
-				read_size += mothbus::read(m_next_layer, source.prepare((mbap_header::header_size));
+				read_size += mothbus::read(m_next_layer, source.prepare(mbap_header::header_size));
 				source.commit(read_size);
 				uint16_t received_transaction_id = 0;
 				uint16_t protocol = 0;
@@ -224,7 +220,7 @@ namespace mothbus
 						return;
 					}
 					op.parse_header(read_size);
-				});
+				}));
 			}
 
 			template <class Resp>
