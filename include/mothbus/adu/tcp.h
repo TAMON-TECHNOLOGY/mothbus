@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file		tcp.h
  * \brief		The Implementation of Application Data Unit for modbus/TCP.
  */
